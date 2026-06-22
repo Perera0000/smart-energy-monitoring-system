@@ -118,6 +118,7 @@ smart-energy-monitoring-system/
 ## 👨‍💻 Author
 
 **Perera** — [GitHub](https://github.com/Perera0000)
+**Hashini** — [GitHub](https://github.com/hasineenikesala)
 
 ---
 
