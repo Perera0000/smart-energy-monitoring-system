@@ -1,0 +1,151 @@
+
+#include <ESP8266WiFi.h>
+#include <BlynkSimpleEsp8266.h>
+
+// Set your Wi-Fi credentials
+char ssid[] = "sahas";
+char pass[] = "123456789";
+
+// Set your Blynk authentication token
+char auth[] = "OBv5Q8grHs3hVPxBCWRRmLMjI39U5tou";
+
+
+// bellow for lcd
+#include <Wire.h>               // i2c library
+#include <LiquidCrystal_I2C.h>  // lcd library
+#define lcdcol 20
+#define lcdrow 4
+LiquidCrystal_I2C lcd(0x27, lcdcol, lcdrow);
+
+#include <PZEM004Tv30.h>
+PZEM004Tv30 pzem(D3, D4);
+
+float svoltage;
+float sfrequency;
+float scurrent;
+float spower;
+float spf;
+float senergy;
+
+void setup() {
+  
+
+  Serial.begin(115200);
+  lcd.begin(lcdcol, lcdrow);  // for lcd begin
+  lcd.init();
+  lcd.backlight();  //backlight
+  Blynk.begin(auth, ssid, pass);
+
+  //  Blynk.begin(auth, ssid, pass, "blynk.cloud", 80);
+  // WiFi.begin(ssid, pass);  // Connect to Wi-Fi network
+
+  //startDis();  //display welcome massage
+
+
+}
+void loop() {
+
+
+  sensor();
+  Blynk.run();
+  send();
+}
+
+
+void sensor() {
+
+
+  float voltage = pzem.voltage();
+  float frequency = pzem.frequency();
+  float current = pzem.current();
+  float power = pzem.power();
+  float energy = pzem.energy();
+  float pf = pzem.pf();
+
+ // if voltage
+
+  // assign value for send to iot
+  svoltage = voltage;
+  sfrequency = frequency;
+  scurrent = current;
+  spower = power;
+  spf = pf;
+  senergy = energy;
+
+
+  Serial.println(frequency);
+  lcd.setCursor(0, 0);
+  lcd.print("Volt:");
+  lcd.print(voltage, 1);
+  lcd.print("V");
+
+
+  lcd.setCursor(0, 1);
+  lcd.print("Freq:");
+  lcd.print(frequency, 2);
+  lcd.print("Hz");
+
+
+  lcd.setCursor(0, 2);
+  lcd.print("Curr:");
+  lcd.print(current, 2);
+  lcd.print("A");
+
+
+  lcd.setCursor(0, 3);
+  lcd.print("Pow :");
+  lcd.print(power, 2);
+  lcd.print("W");
+
+
+  lcd.setCursor(13, 0);
+  lcd.print("PF :");
+  lcd.print(pf, 1);
+
+  lcd.setCursor(13, 1);
+  lcd.print("Eng:");
+
+
+  lcd.setCursor(13, 2);
+  lcd.print(energy, 2);
+  lcd.print("kWh");
+
+
+  lcd.setCursor(13, 3);
+  //lcd.print(energy, 2);
+  lcd.print("Tem:34");
+  lcd.print("C");
+ 
+ 
+
+  delay(1000);
+
+}
+
+
+
+void send() {  // sending to iot
+
+  Blynk.virtualWrite(V4, svoltage);
+  Blynk.virtualWrite(V0, sfrequency);
+  Blynk.virtualWrite(V5, scurrent);
+  Blynk.virtualWrite(V9, spower);
+  Blynk.virtualWrite(V8, spf);
+  Blynk.virtualWrite(V1, senergy);
+
+}
+
+
+void startDis(){
+  lcd.setCursor(0, 0);
+  lcd.print("Starting");
+
+  lcd.setCursor(0, 1);
+  lcd.print("smart energ");
+
+  lcd.setCursor(0, 2);
+  lcd.print("meter");
+
+  delay(3000);
+ 
+}
